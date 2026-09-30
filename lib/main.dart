@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:memora/cadastro.dart';
+import 'package:memora/telainicial.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
+  await Supabase.initialize( // inicialização do banco de dados
     url: 'https://yseqvbbrcihjxlgwdhsw.supabase.co',
     publishableKey: 'sb_publishable_1hHOXT3DbrfqJoWVhYumCA_sCeNOrx_',
   );
@@ -13,7 +14,7 @@ void main() async {
   runApp(const MyApp());
 }
 
-final supabase = Supabase.instance.client;
+final supabase = Supabase.instance.client; // variável de usuário do banco
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -23,25 +24,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: const Color.fromARGB(255, 18, 32, 47)),
       ),
-      home: TelaLogin(),
-      //home: supabase.auth.currentUser == null ? TelaLogin() : TelaInicial(),
+      home: supabase.auth.currentUser == null ? TelaLogin() : TelaInicial(),
     );
   }
 }
@@ -49,21 +34,13 @@ class MyApp extends StatelessWidget {
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   @override
   State<TelaLogin> createState() => _TelaLoginState();
 }
 
 class _TelaLoginState extends State<TelaLogin> {
 
+  // controladores dos campos de texto da tela
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
 
@@ -77,25 +54,19 @@ class _TelaLoginState extends State<TelaLogin> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      body: Padding (
+      body: Padding ( // distanciar título do topo da tela
         padding: const EdgeInsets.only(top: 125),
-        child: SizedBox(              
+        child: SizedBox( // fazer os filhos da SizedBox ocuparem toda a largura da tela    
           width: double.infinity,
-          child: Padding (
+          child: Padding ( // manter filhos do Padding centralizados com margem lateral
             padding: const EdgeInsets.symmetric(horizontal: 48.0),
           
-            child: Column(
+            child: Column( // elementos da tela um abaixo do outro
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
 
-                Text(
+                Text( // texto de título
                   "Bem-vindo ao",
                   style: TextStyle(
                     fontSize: 50,
@@ -104,7 +75,7 @@ class _TelaLoginState extends State<TelaLogin> {
                   ),
                 ),
 
-                Text(
+                Text( // texto de título
                  "MEMORA",
                  style: TextStyle(
                     fontSize: 50,
@@ -112,8 +83,16 @@ class _TelaLoginState extends State<TelaLogin> {
                  ),
                 ),
 
-                SizedBox(
-                  height: 150,
+                Text( // texto de subtítulo
+                  "Seu assistente de memória pessoal",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                SizedBox( // espaçamento entre elementos
+                  height: 100,
                 ),
 
                Text(
@@ -123,11 +102,11 @@ class _TelaLoginState extends State<TelaLogin> {
                  ),
                 ),
 
-                SizedBox(
+                SizedBox( // espaçamento entre elementos
                   height: 15,
                 ),
 
-                TextFormField(
+                TextFormField( // campo de email
                  controller: emailController,
                  style: TextStyle(
                     color: Color.fromARGB(255, 0, 0, 0),
@@ -170,11 +149,11 @@ class _TelaLoginState extends State<TelaLogin> {
                 ),
               ),
 
-              SizedBox(
+              SizedBox( // espaçamento entre elementos
                   height: 25,
                 ),
 
-                TextFormField(
+                TextFormField( // campo de senha
                  controller: senhaController,
                  obscureText: true,
                  style: TextStyle(
@@ -218,13 +197,36 @@ class _TelaLoginState extends State<TelaLogin> {
                 ),
               ),
 
-              SizedBox(
+              SizedBox( // espaçamento entre elementos
                   height: 25,
                 ),
 
-                OutlinedButton(
+                OutlinedButton( // botão de fazer login
                   onPressed: () async {
-                    //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TelaInicial()));
+                    if (emailController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Informe seu email!")));
+                      return;
+                    }
+
+                    if (senhaController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Informe sua senha")));
+                      return;
+                    }
+
+                    try {
+                      
+                      await supabase.auth.signInWithPassword(
+                        email: emailController.text.trim(),
+                        password: senhaController.text,
+                      );
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TelaInicial()));
+                    } catch (e) {
+
+                      print(e);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Email ou senha incorretos")));
+                    }
+
+                    
                   },
 
                   style: OutlinedButton.styleFrom(
@@ -239,9 +241,68 @@ class _TelaLoginState extends State<TelaLogin> {
                     )
                   ),
 
-                  child: Text(
+                  child: Text( // texto do botão de fazer login
                     textAlign: TextAlign.center,
                     "Entrar",
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+
+                SizedBox ( // espaçamento entre elementos
+                  height: 75,
+                ),
+
+                Row( // elementos da tela um ao lado do outro
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 5.0,
+
+                  children: [
+
+                    Text(
+                      textAlign: TextAlign.start,
+                      "Não possui uma conta?",
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    Text(
+                      textAlign: TextAlign.justify,
+                      "Crie agora!",
+                      style: TextStyle(
+                        fontSize: 18,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox( // espaçamento entre elementos
+                  height: 15,
+                ),
+
+                OutlinedButton( // botão de ir para tela de cadastro
+                  onPressed: () async {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => TelaCadastro()));
+                  },
+
+                  style: OutlinedButton.styleFrom(
+                    fixedSize: Size(200, 50),
+                    foregroundColor: Color.fromARGB(255, 0, 0, 0),
+                    side: const BorderSide(
+                      color: Colors.black,
+                      width: 1.0,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    )
+                  ),
+
+                  child: Text( // texto do botão de ir para tela de cadastro
+                    textAlign: TextAlign.center,
+                    "Criar conta",
                     style: TextStyle(
                       fontSize: 20,
                     ),
