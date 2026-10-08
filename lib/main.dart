@@ -16,30 +16,74 @@ void main() async {
 
 final supabase = Supabase.instance.client; // variável de usuário do banco
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+  class _MyAppState extends State<MyApp> {
+    ThemeMode _temaAtual = ThemeMode.system;
+
+  // Função para mudar o tema de qualquer lugar do app
+  void alterarTema(ThemeMode novoTema) {
+    setState(() {
+      _temaAtual = novoTema;
+    });
+  }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      themeMode: _temaAtual,
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: const Color.fromARGB(255, 18, 32, 47)),
+        brightness: Brightness.light,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Color.fromARGB(255, 46, 37, 58),
+        ),
+        colorScheme: const ColorScheme.light(
+          primary: Color.fromARGB(255, 46, 37, 58),
+          surface: Color.fromARGB(255, 240, 232, 213),
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Color.fromARGB(255, 46, 37, 58)),
+        ),
       ),
-      home: supabase.auth.currentUser == null ? TelaLogin() : TelaInicial(),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Color.fromARGB(255, 240, 232, 213),
+        ),
+        colorScheme: const ColorScheme.dark(
+          primary: Color.fromARGB(255, 240, 232, 213),
+          surface: Color.fromARGB(255, 46, 37, 58),
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Color.fromARGB(255, 240, 232, 213)),
+        ),
+      ),
+      //home: TelaLogin(temaSelecionado: _temaAtual, aoMudarTema: alterarTema),
+      home: supabase.auth.currentUser == null ? TelaLogin(temaSelecionado: _temaAtual, aoMudarTema: alterarTema) : TelaInicial(temaSelecionado: _temaAtual, aoMudarTema: alterarTema),
     );
   }
 }
 
 class TelaLogin extends StatefulWidget {
-  const TelaLogin({super.key});
+  final ThemeMode temaSelecionado;
+  final Function(ThemeMode) aoMudarTema;
+
+  const TelaLogin({super.key, required this.temaSelecionado, required this.aoMudarTema});
 
   @override
   State<TelaLogin> createState() => _TelaLoginState();
 }
 
 class _TelaLoginState extends State<TelaLogin> {
-
+  
   // controladores dos campos de texto da tela
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
@@ -54,261 +98,278 @@ class _TelaLoginState extends State<TelaLogin> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      body: Padding ( // distanciar título do topo da tela
-        padding: const EdgeInsets.only(top: 125),
-        child: SizedBox( // fazer os filhos da SizedBox ocuparem toda a largura da tela    
+      body: Container (
+
           width: double.infinity,
-          child: Padding ( // manter filhos do Padding centralizados com margem lateral
-            padding: const EdgeInsets.symmetric(horizontal: 48.0),
+          height: double.infinity,
           
-            child: Column( // elementos da tela um abaixo do outro
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                isDarkMode ? 'imagens/Fundo_escuro.png' : 'imagens/Fundo_claro.png',
+              ),
+              fit: BoxFit.cover,
+            ),
+          ),
+      
+        child: Padding ( // distanciar título do topo da tela
+          padding: const EdgeInsets.only(top: 125),
+          child: SizedBox( // fazer os filhos da SizedBox ocuparem toda a largura da tela    
+            width: double.infinity,
+            child: Padding ( // manter filhos do Padding centralizados com margem lateral
+              padding: const EdgeInsets.symmetric(horizontal: 48.0),
+            
+              child: Column( // elementos da tela um abaixo do outro
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
 
-                Text( // texto de título
-                  "Bem-vindo ao",
-                  style: TextStyle(
-                    fontSize: 50,
-                   fontWeight: FontWeight.bold,
-                   height: 1.0
+                  Text( // texto de título
+                    "Bem-vindo ao",
+                    style: TextStyle(
+                      fontSize: 50,
+                    fontWeight: FontWeight.bold,
+                    height: 1.0
+                    ),
                   ),
-                ),
 
-                Text( // texto de título
-                 "MEMORA",
-                 style: TextStyle(
-                    fontSize: 50,
-                   fontWeight: FontWeight.bold,
-                 ),
-                ),
-
-                Text( // texto de subtítulo
-                  "Seu assistente de memória pessoal",
+                  Text( // texto de título
+                  "MEMORA",
                   style: TextStyle(
-                    fontSize: 18,
+                      fontSize: 50,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
+                  ),
 
-                SizedBox( // espaçamento entre elementos
-                  height: 100,
-                ),
+                  Text( // texto de subtítulo
+                    "Seu assistente de memória pessoal",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
 
-               Text(
-                  "Entre em sua conta",
+                  SizedBox( // espaçamento entre elementos
+                    height: 100,
+                  ),
+
+                Text(
+                    "Entre em sua conta",
+                    style: TextStyle(
+                      fontSize: 20,
+                  ),
+                  ),
+
+                  SizedBox( // espaçamento entre elementos
+                    height: 15,
+                  ),
+
+                  TextFormField( // campo de email
+                  controller: emailController,
                   style: TextStyle(
-                    fontSize: 20,
-                 ),
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                      hintText: 'Email',
+                      hintStyle: TextStyle(
+                      color: Color.fromARGB(255, 200, 200, 200),
+                      fontStyle: FontStyle.italic,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                          color:  Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                        ),
+                      ),
+
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                        ),
+                      ),
+                      prefixIcon: Icon(Icons.email),
+                  ),
                 ),
 
                 SizedBox( // espaçamento entre elementos
-                  height: 15,
-                ),
-
-                TextFormField( // campo de email
-                 controller: emailController,
-                 style: TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    height: 25,
                   ),
-                 keyboardType: TextInputType.emailAddress,
-                 decoration: InputDecoration(
-                    hintText: 'Email',
-                    hintStyle: TextStyle(
-                     color: Color.fromARGB(255, 200, 200, 200),
-                     fontStyle: FontStyle.italic,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                     borderSide: BorderSide(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                     ),
-                   ),
 
-                    focusedBorder: OutlineInputBorder(
+                  TextFormField( // campo de senha
+                  controller: senhaController,
+                  obscureText: true,
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  keyboardType: TextInputType.visiblePassword,
+                  decoration: InputDecoration(
+                      hintText: 'Senha',
+                      hintStyle: TextStyle(
+                      color: Color.fromARGB(255, 200, 200, 200),
+                      fontStyle: FontStyle.italic,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+
+                      errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide(
-                         color: const Color.fromARGB(255, 0, 0, 0),
+                          color: Colors.red,
+                        ),
                       ),
-                    ),
 
-                     errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                        color: Colors.red,
-                      ),
-                    ),
-
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                        color: Colors.red,
-                      ),
-                    ),
-                    prefixIcon: Icon(Icons.email),
-                ),
-              ),
-
-              SizedBox( // espaçamento entre elementos
-                  height: 25,
-                ),
-
-                TextFormField( // campo de senha
-                 controller: senhaController,
-                 obscureText: true,
-                 style: TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                 keyboardType: TextInputType.visiblePassword,
-                 decoration: InputDecoration(
-                    hintText: 'Senha',
-                    hintStyle: TextStyle(
-                     color: Color.fromARGB(255, 200, 200, 200),
-                     fontStyle: FontStyle.italic,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                     borderSide: BorderSide(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                     ),
-                   ),
-
-                    focusedBorder: OutlineInputBorder(
+                      focusedErrorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide(
-                         color: const Color.fromARGB(255, 0, 0, 0),
+                          color: Colors.red,
+                        ),
                       ),
-                    ),
-
-                     errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                        color: Colors.red,
-                      ),
-                    ),
-
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                        color: Colors.red,
-                      ),
-                    ),
-                    prefixIcon: Icon(Icons.key),
-                ),
-              ),
-
-              SizedBox( // espaçamento entre elementos
-                  height: 25,
+                      prefixIcon: Icon(Icons.key),
+                  ),
                 ),
 
-                OutlinedButton( // botão de fazer login
-                  onPressed: () async {
-                    if (emailController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Informe seu email!")));
-                      return;
-                    }
+                SizedBox( // espaçamento entre elementos
+                    height: 25,
+                  ),
 
-                    if (senhaController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Informe sua senha")));
-                      return;
-                    }
+                  OutlinedButton( // botão de fazer login
+                    onPressed: () async {
+                      if (emailController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Informe seu email!")));
+                        return;
+                      }
 
-                    try {
+                      if (senhaController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Informe sua senha")));
+                        return;
+                      }
+
+                      try {
+                        
+                        await supabase.auth.signInWithPassword(
+                          email: emailController.text.trim(),
+                          password: senhaController.text,
+                        );
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TelaInicial(temaSelecionado: widget.temaSelecionado, aoMudarTema: widget.aoMudarTema)));
+                      } catch (e) {
+
+                        print(e);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Email ou senha incorretos")));
+                      }
+
                       
-                      await supabase.auth.signInWithPassword(
-                        email: emailController.text.trim(),
-                        password: senhaController.text,
-                      );
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TelaInicial()));
-                    } catch (e) {
+                    },
 
-                      print(e);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Email ou senha incorretos")));
-                    }
-
-                    
-                  },
-
-                  style: OutlinedButton.styleFrom(
-                    fixedSize: Size(200, 50),
-                    foregroundColor: Color.fromARGB(255, 0, 0, 0),
-                    side: const BorderSide(
-                      color: Colors.black,
-                      width: 1.0,
+                    style: OutlinedButton.styleFrom(
+                      fixedSize: Size(200, 50),
+                      foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      )
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    )
-                  ),
 
-                  child: Text( // texto do botão de fazer login
-                    textAlign: TextAlign.center,
-                    "Entrar",
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-
-                SizedBox ( // espaçamento entre elementos
-                  height: 75,
-                ),
-
-                Row( // elementos da tela um ao lado do outro
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 5.0,
-
-                  children: [
-
-                    Text(
-                      textAlign: TextAlign.start,
-                      "Não possui uma conta?",
+                    child: Text( // texto do botão de fazer login
+                      textAlign: TextAlign.center,
+                      "Entrar",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 20,
                       ),
                     ),
+                  ),
 
-                    Text(
-                      textAlign: TextAlign.justify,
-                      "Crie agora!",
+                  SizedBox ( // espaçamento entre elementos
+                    height: 75,
+                  ),
+
+                  Row( // elementos da tela um ao lado do outro
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 5.0,
+
+                    children: [
+
+                      Text(
+                        textAlign: TextAlign.start,
+                        "Não possui uma conta?",
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
+                      ),
+
+                      Text(
+                        textAlign: TextAlign.justify,
+                        "Crie agora!",
+                        style: TextStyle(
+                          fontSize: 18,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox( // espaçamento entre elementos
+                    height: 15,
+                  ),
+
+                  OutlinedButton( // botão de ir para tela de cadastro
+                    onPressed: () async {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => TelaCadastro(temaSelecionado: widget.temaSelecionado, aoMudarTema: widget.aoMudarTema)));
+                    },
+
+                    style: OutlinedButton.styleFrom(
+                      fixedSize: Size(200, 50),
+                      foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      )
+                    ),
+
+                    child: Text( // texto do botão de ir para tela de cadastro
+                      textAlign: TextAlign.center,
+                      "Criar conta",
                       style: TextStyle(
-                        fontSize: 18,
-                        decoration: TextDecoration.underline,
+                        fontSize: 20,
                       ),
                     ),
-                  ],
-                ),
-
-                SizedBox( // espaçamento entre elementos
-                  height: 15,
-                ),
-
-                OutlinedButton( // botão de ir para tela de cadastro
-                  onPressed: () async {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => TelaCadastro()));
-                  },
-
-                  style: OutlinedButton.styleFrom(
-                    fixedSize: Size(200, 50),
-                    foregroundColor: Color.fromARGB(255, 0, 0, 0),
-                    side: const BorderSide(
-                      color: Colors.black,
-                      width: 1.0,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    )
                   ),
-
-                  child: Text( // texto do botão de ir para tela de cadastro
-                    textAlign: TextAlign.center,
-                    "Criar conta",
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
